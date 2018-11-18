@@ -1,7 +1,7 @@
 const express = require('express')
 const app = express()
 
-let numbers = [
+let persons = [
     {
         id: 1,
         name: 'Arto Hellas',
@@ -28,29 +28,29 @@ app.get('/', (request, response) => {
     response.send('<h1>Hello World!</h1>')
 })
 
-app.get('/api/numbers', (request, response) => {
-    response.json(numbers)
+app.get('/api/persons', (request, response) => {
+    response.json(persons)
 })
 
-app.get('/api/numbers/:id', (request, response) => {
+app.get('/api/persons/:id', (request, response) => {
     const id = Number(request.params.id)
-    const number = numbers.find(number => number.id === id)
+    const person = persons.find(person => person.id === id)
 
-    if (number) {
-        response.json(number)
+    if (person) {
+        response.json(person)
     } else {
         response.status(404).end()
     }
 })
 
 app.get('/info', (request, response) => {
-    const amount = numbers.length
+    const amount = persons.length
     response.send("puhelinluettelossa " + amount + " henkilön tiedot<br><br>" + new Date())
 })
 
-app.delete('/numbers/:id', (request, response) => {
+app.delete('/persons/:id', (request, response) => {
     const id = Number(request.params.id)
-    numbers = numbers.filter(number => number.id !== id)
+    persons = persons.filter(person => person.id !== id)
 
     response.status(204).end()
 })
