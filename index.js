@@ -24,12 +24,12 @@ let numbers = [
     }
 ]
 
-app.get('/', (req, res) => {
-    res.send('<h1>Hello World!</h1>')
+app.get('/', (request, response) => {
+    response.send('<h1>Hello World!</h1>')
 })
 
-app.get('/api/numbers', (req, res) => {
-    res.json(numbers)
+app.get('/api/numbers', (request, response) => {
+    response.json(numbers)
 })
 
 app.get('/api/numbers/:id', (request, response) => {
@@ -41,6 +41,11 @@ app.get('/api/numbers/:id', (request, response) => {
     } else {
         response.status(404).end()
     }
+})
+
+app.get('/info', (request, response) => {
+    const amount = numbers.length
+    response.send("puhelinluettelossa " + amount + " henkilön tiedot<br><br>" + new Date())
 })
 
 app.delete('/numbers/:id', (request, response) => {
