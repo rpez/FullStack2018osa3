@@ -2,9 +2,14 @@ const express = require('express')
 const app = express()
 const bodyParser = require('body-parser')
 const morgan = require('morgan')
+const cors = require('cors')
 
+app.use(cors())
 app.use(bodyParser.json())
-app.use(morgan('tiny'))
+
+morgan.token('data', function (req, res) { return JSON.stringify(req.body) })
+
+app.use(morgan(':method :url :data :status :res[content-length] - :response-time ms'))
 
 let persons = [
     {
@@ -53,14 +58,14 @@ app.get('/info', (request, response) => {
     response.send("puhelinluettelossa " + amount + " henkilön tiedot<br><br>" + new Date())
 })
 
-app.delete('/persons/:id', (request, response) => {
+app.delete('/api/persons/:id', (request, response) => {
     const id = Number(request.params.id)
     persons = persons.filter(person => person.id !== id)
 
     response.status(204).end()
 })
 
-app.post('/persons', (request, response) => {
+app.post('/api/persons', (request, response) => {
     const body = request.body
     if (persons.map(a => a.name).includes(body.name)) {
         return response.status(400).json({ error: 'name must be unique' })
