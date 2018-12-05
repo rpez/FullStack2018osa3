@@ -13,14 +13,6 @@ morgan.token('data', function (req, res) { return JSON.stringify(req.body) })
 
 app.use(morgan(':method :url :data :status :res[content-length] - :response-time ms'))
 
-const formatPerson = (person) => {
-    return {
-        id: person._id,
-        name: person.name,
-        number: person.number
-    }
-}
-
 app.get('/', (request, response) => {
     response.send('<h1>Hello World!</h1>')
 })
@@ -29,7 +21,11 @@ app.get('/api/persons', (request, response) => {
     Person
         .find({})
         .then(persons => {
-            response.json(persons.map(formatPerson))
+            response.json(persons.map(Person.format))
+        })
+        .catch(error => {
+            console.log(error)
+            response.status(404).end()
         })
 })
 
@@ -37,7 +33,15 @@ app.get('/api/persons/:id', (request, response) => {
     Person
         .findById(request.params.id)
         .then(person => {
-            response.json(formatPerson(person))
+            response.json(Person.format(person))
+        })
+        .catch(error => {
+            console.log(error)
+            response.status(404).end()
+        })
+        .catch(error => {
+            console.log(error)
+            response.status(400).send({ error: 'malformatted id' })
         })
 })
 
@@ -47,17 +51,18 @@ app.get('/info', (request, response) => {
 })
 
 app.delete('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    persons = persons.filter(person => person.id !== id)
-
-    response.status(204).end()
+    Person
+        .findByIdAndRemove(request.params.id)
+        .then(result => {
+            response.status(204).end()
+        })
+        .catch(error => {
+            response.status(400).send({ error: 'malformatted id' })
+        })
 })
 
 app.post('/api/persons', (request, response) => {
     const body = request.body
-    if (persons.map(a => a.name).includes(body.name)) {
-        return response.status(400).json({ error: 'name must be unique' })
-    }
     if (body.name === undefined) {
         return response.status(400).json({ error: 'name missing' })
     }
@@ -72,7 +77,30 @@ app.post('/api/persons', (request, response) => {
     person
         .save()
         .then(savedPerson => {
-            response.json(formatPerson(savedPerson))
+            response.json(Person.format(savedPerson))
+        })
+        .catch(error => {
+            console.log(error)
+            response.status(404).end()
+        })
+})
+
+app.put('/api/persons/:id', (request, response) => {
+    const body = request.body
+
+    const person = {
+        name: body.name,
+        number: body.number
+    }
+
+    Person
+        .findByIdAndUpdate(request.params.id, person, { new: true })
+        .then(updatedPerson => {
+            response.json(Person.format(updatedPerson))
+        })
+        .catch(error => {
+            console.log(error)
+            response.status(400).send({ error: 'malformatted id' })
         })
 })
 
