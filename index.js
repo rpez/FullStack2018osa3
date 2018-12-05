@@ -69,19 +69,27 @@ app.post('/api/persons', (request, response) => {
     if (body.number === undefined) {
         return response.status(400).json({ error: 'number missing' })
     }
-    const person = new Person({
-        name: body.name,
-        number: body.number
-    })
-
-    person
-        .save()
-        .then(savedPerson => {
-            response.json(Person.format(savedPerson))
-        })
-        .catch(error => {
-            console.log(error)
-            response.status(404).end()
+    Person
+        .findOne({ name: body.name })
+        .then(result => {
+            if (result === null) {
+                const person = new Person({
+                    name: body.name,
+                    number: body.number
+                })
+                person
+                    .save()
+                    .then(savedPerson => {
+                        response.json(Person.format(savedPerson))
+                    })
+                    .catch(error => {
+                        console.log(error)
+                        response.status(404).end()
+                    })
+            }
+            else {
+                response.status(400).json({ error: 'person already exists' })
+            }
         })
 })
 
